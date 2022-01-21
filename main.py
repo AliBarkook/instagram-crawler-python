@@ -45,6 +45,19 @@ passwordInput.send_keys(password)
 
 
 # ? click submit button to apply filter changes
-WebDriverWait(driver, 200).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="loginForm"]/div/div[3]/button/div'))).click()
+WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="loginForm"]/div/div[3]/button/div'))).click()
 
-sleep(60)
+sleep(2)
+
+# entry_hashtag = input('enter hashtag: ')
+entry_hashtag = 'یلدا'
+sleep(2)
+
+# ? fill search input
+searchInput = driver.find_element_by_xpath('//*[@id="react-root"]/section/nav/div[2]/div/div/div[2]/input')
+searchInput.send_keys('#' + entry_hashtag)
+
+# ? open first result
+WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, '-qQT3'))).click()
+
+sleep(20)
