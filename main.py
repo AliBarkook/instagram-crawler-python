@@ -17,7 +17,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-siteCarsUrl = 'https://www.instagram.com/accounts/login/'
+site_login_url = 'https://www.instagram.com/accounts/login/'
+site_url = 'https://www.instagram.com/'
 username = 'ghost_sniper001'
 password = 'Pashmak2'
 
@@ -39,7 +40,7 @@ driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () =>
 
 
 # ? open chrome 
-driver.get(siteCarsUrl)
+driver.get(site_login_url)
 
 sleep(2)
 
@@ -61,48 +62,95 @@ entry_hashtag = 'یلدا'
 
 sleep(5)
 
-# ? fill search input
-searchInput = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="react-root"]/section/nav/div[2]/div/div/div[2]/input')))
-searchInput.send_keys('#' + entry_hashtag)
+# ? read cookie use selenium and set to request
+cookies = driver.get_cookies()
+session = requests.Session()
+for cookie in cookies:
+    session.cookies.set(cookie['name'], cookie['value'])
 
 sleep(1)
-# ? open first result
-WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, '-qQT3'))).click()
+# # ? fill search input
+# searchInput = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="react-root"]/section/nav/div[2]/div/div/div[2]/input')))
+# searchInput.send_keys('#' + entry_hashtag)
 
-sleep(5)
+# sleep(1)
+# # ? open first result
+# WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, '-qQT3'))).click()
 
-posts = driver.find_elements_by_class_name('v1Nh3')
+# sleep(5)
 
-sleep(2)
+# posts = driver.find_elements_by_class_name('v1Nh3')
 
-accountList = []
+# sleep(2)
+
+# accountList = []
+
+
 print('getting accounts name ...')
-for post in posts:
-    # ? find post url
-    postUrl = post.find_element_by_tag_name('a').get_attribute('href')
+# for post in posts:
+#     # ? find post url
+#     postUrl = post.find_element_by_tag_name('a').get_attribute('href')
 
-    # ? read cookie use selenium and set to request
-    cookies = driver.get_cookies()
-    session = requests.Session()
-    for cookie in cookies:
-        session.cookies.set(cookie['name'], cookie['value'])
+    # # ? read cookie use selenium and set to request
+    # cookies = driver.get_cookies()
+    # session = requests.Session()
+    # for cookie in cookies:
+    #     session.cookies.set(cookie['name'], cookie['value'])
 
-    # ? request to get post page
-    postResponse = session.get(postUrl)
-    beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
+#     # ? request to get post page
+#     postResponse = session.get(postUrl)
+#     beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
 
-    # ? find account name
-    account_name = (str(beauti_Post.find_all('script')[15]).split('username')[1]).split('"')[2]
+#     # ? find account name
+#     account_name = (str(beauti_Post.find_all('script')[15]).split('username')[1]).split('"')[2]
 
-    # ? add account name to list
-    accountList.append(account_name)
+#     # ? add account name to list
+#     accountList.append(account_name)
 
-print(accountList)
+# print(accountList)
 
 # textFileDirectory = 'account_lists/account_name(hashtag:' + entry_hashtag + ').txt'
 
-# ? store account list to text file
-with open('account_lists/account_name.txt' , 'w') as f:
-    for line in accountList:
+# # ? store account list to text file
+# with open('account_lists/account_name.txt' , 'w') as f:
+#     for line in accountList:
+#         f.write(line)
+#         f.write('\n')
+
+
+# with open('account_lists/account_name.txt') as f:
+#     accountList = f.readlines()
+
+accountList = ['marii.family', 'sam.product',]
+print(accountList)
+
+
+
+post_links = []
+for account in accountList:
+
+    # ? open account page with selenium
+    driver.get(site_url + account)
+
+    post_list = driver.find_elements_by_class_name('v1Nh3')
+
+
+    # ? find posts href
+    for post in post_list:
+        post_links.append(post.find_element_by_tag_name('a').get_attribute('href'))
+    
+
+    # postResponse = session.get(site_url + account)
+    # beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
+
+    # with open('readme.txt' , 'w', encoding="utf-8") as f:
+    #     f.write(str(beauti_Post.prettify()))
+
+    # print(beauti_Post.find_all(class_='v1Nh3 '))
+
+
+# # ? store post link list to text file
+with open('account_lists/post_link.txt' , 'w') as f:
+    for line in post_links:
         f.write(line)
         f.write('\n')
