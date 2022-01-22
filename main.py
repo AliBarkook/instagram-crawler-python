@@ -2,6 +2,7 @@
 # ! modules:
 
 # ? improt selenium module
+from sys import orig_argv
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -61,7 +62,6 @@ entry_hashtag = 'یلدا'
 sleep(5)
 
 # ? fill search input
-# searchInput = driver.find_element_by_class_name('XTCLo')
 searchInput = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="react-root"]/section/nav/div[2]/div/div/div[2]/input')))
 searchInput.send_keys('#' + entry_hashtag)
 
@@ -75,42 +75,34 @@ posts = driver.find_elements_by_class_name('v1Nh3')
 
 sleep(2)
 
-# print(posts)
-
-postLinks = []
 accountList = []
+print('getting accounts name ...')
 for post in posts:
-    postLinks.append(post.find_element_by_tag_name('a').get_attribute('href'))
+    # ? find post url
+    postUrl = post.find_element_by_tag_name('a').get_attribute('href')
 
-    print('href is: ' + post.find_element_by_tag_name('a').get_attribute('href'))
-
+    # ? read cookie use selenium and set to request
     cookies = driver.get_cookies()
-
-    s = requests.Session()
+    session = requests.Session()
     for cookie in cookies:
-        s.cookies.set(cookie['name'], cookie['value'])
+        session.cookies.set(cookie['name'], cookie['value'])
 
-    
+    # ? request to get post page
+    postResponse = session.get(postUrl)
+    beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
 
-#     cookies = {'enwiki_session': '17ab96bd8ffbe8ca58a78657a918558'}
+    # ? find account name
+    account_name = (str(beauti_Post.find_all('script')[15]).split('username')[1]).split('"')[2]
 
-# r = requests.post('http://wikipedia.org', cookies=cookies)
-
-    courseResponse = s.get('https://www.instagram.com/p/CY8lvPIqPoi/')
-    courseHtml = BeautifulSoup(courseResponse.text, 'html.parser')
-
-    with open('readme.txt', 'w') as f:
-            f.write(courseResponse.text)
-
-    print(courseHtml)
-    print(courseHtml.find(class_="yWX7d").get_text())
-
-    try:
-        accountList.append(courseHtml.find(class_="yWX7d").get_text())
-    except:
-        print('')
-
+    # ? add account name to list
+    accountList.append(account_name)
 
 print(accountList)
 
-sleep(10)
+# textFileDirectory = 'account_lists/account_name(hashtag:' + entry_hashtag + ').txt'
+
+# ? store account list to text file
+with open('account_lists/account_name.txt' , 'w') as f:
+    for line in accountList:
+        f.write(line)
+        f.write('\n')
