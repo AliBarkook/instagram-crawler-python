@@ -16,6 +16,8 @@ import requests
 # ? import Beautiful soup module for pars html
 from bs4 import BeautifulSoup
 
+# ! class
+from classes.comment_class import comment_class
 
 site_login_url = 'https://www.instagram.com/accounts/login/'
 site_url = 'https://www.instagram.com/'
@@ -121,23 +123,23 @@ print('getting accounts name ...')
 # with open('account_lists/account_name.txt') as f:
 #     accountList = f.readlines()
 
-accountList = ['marii.family', 'sam.product',]
-print(accountList)
+# accountList = ['marii.family', 'sam.product',]
+# print(accountList)
 
 
 
-post_links = []
-for account in accountList:
+# post_links = []
+# for account in accountList:
 
-    # ? open account page with selenium
-    driver.get(site_url + account)
+#     # ? open account page with selenium
+#     driver.get(site_url + account)
 
-    post_list = driver.find_elements_by_class_name('v1Nh3')
+#     post_list = driver.find_elements_by_class_name('v1Nh3')
 
 
-    # ? find posts href
-    for post in post_list:
-        post_links.append(post.find_element_by_tag_name('a').get_attribute('href'))
+#     # ? find posts href
+#     for post in post_list:
+#         post_links.append(post.find_element_by_tag_name('a').get_attribute('href'))
     
 
     # postResponse = session.get(site_url + account)
@@ -149,8 +151,47 @@ for account in accountList:
     # print(beauti_Post.find_all(class_='v1Nh3 '))
 
 
-# # ? store post link list to text file
-with open('account_lists/post_link.txt' , 'w') as f:
-    for line in post_links:
-        f.write(line)
-        f.write('\n')
+# # # ? store post link list to text file
+# with open('account_lists/post_link.txt' , 'w') as f:
+#     for line in post_links:
+#         f.write(line)
+#         f.write('\n')
+
+
+# postResponse = session.get('https://www.instagram.com/p/CWvLWa_A2r3/')
+# beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
+
+# with open('readme.txt' , 'w', encoding="utf-8") as f:
+#     f.write(str(beauti_Post.prettify()))
+
+# print(beauti_Post.find_all(class_='Mr508'))
+
+driver.get('https://www.instagram.com/p/CWvLWa_A2r3/')
+
+sleep(2)
+
+# ? get all comments
+comment_list = driver.find_elements_by_class_name('Mr508')
+
+# ? get account name
+comment_account = driver.find_element_by_class_name('ZIAjV').text
+
+# ? get comments info
+for comment in comment_list:
+
+    # ? crawle comment text, author, like count and account name
+    comment_text = comment.find_elements_by_tag_name('span')[1].text
+    comment_author_account = comment.find_element_by_class_name('sqdOP').text
+    comment_like = comment.find_elements_by_class_name('FH9sR')[1].text
+
+    if 'like' in comment_like:
+        comment_like = comment_like[0]
+    else:
+        comment_like = '0'
+
+    commentInstanse = comment_class(comment_account, comment_text, comment_author_account, comment_like)
+
+    print(commentInstanse.return_prop_as_list())
+
+
+# post_list = driver.find_element_by_tag_name('Mr508').text
