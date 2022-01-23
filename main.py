@@ -124,34 +124,23 @@ def get_account_list():
 
 # ? get post of accounts
 def get_post_list():
+    account_list_file = open('account_lists/account_name.txt', 'r')
+    accountList = account_list_file.readlines()
     print('getting accounts post urls')
-    accountList = ['marii.family', 'sam.product',]
-    print(accountList)
-
 
 
     post_links = []
     for account in accountList:
 
         # ? open account page with selenium
-        driver.get(site_url + account)
+        driver.get(site_url + account.strip())
 
         post_list = driver.find_elements_by_class_name('v1Nh3')
-
 
         # ? find posts href
         for post in post_list:
             post_links.append(post.find_element_by_tag_name('a').get_attribute('href'))
         
-
-        postResponse = session.get(site_url + account)
-        beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
-
-        with open('readme.txt' , 'w', encoding="utf-8") as f:
-            f.write(str(beauti_Post.prettify()))
-
-        print(beauti_Post.find_all(class_='v1Nh3 '))
-
 
     # ? store post link list to text file
     with open('account_lists/post_link.txt' , 'w') as f:
@@ -161,34 +150,42 @@ def get_post_list():
 
 # ? get comments and store to excel
 def get_comments():
-    driver.get('https://www.instagram.com/p/CWvLWa_A2r3/')
+    post_list_file = open('account_lists/post_link.txt', 'r')
+    post_list = post_list_file.readlines()
 
-    sleep(2)
+    row = 1
+    for index, post in enumerate(post_list):
+        print('getting post number' + str(index))
+        driver.get(post.strip())
 
-    # ? get all comments
-    comment_list = driver.find_elements_by_class_name('Mr508')
+        sleep(2)
 
-    # ? get account name
-    comment_account = driver.find_element_by_class_name('ZIAjV').text
+        # ? get all comments
+        comment_list = driver.find_elements_by_class_name('Mr508')
 
-    # ? get comments info
-    print('getting comments info')
-    for index, comment in enumerate(comment_list):
+        # ? get account name
+        comment_account = driver.find_element_by_class_name('ZIAjV').text
 
-        # ? crawle comment text, author, like count and account name
-        comment_text = comment.find_elements_by_tag_name('span')[1].text
-        comment_author_account = comment.find_element_by_class_name('sqdOP').text
-        comment_like = comment.find_elements_by_class_name('FH9sR')[1].text
-        if 'like' in comment_like:
-            comment_like = comment_like[0]
-        else:
-            comment_like = '0'
+        # ? get comments info
+        print('getting comments info')
+        for comment in comment_list:
 
-        # ? create instance from comment class
-        commentInstance = Comment_Class(comment_account, comment_text, comment_author_account, comment_like)
-        # ? store course in excel
-        excel.storeDataInExcel(index+1, 0, commentInstance)
+            # ? crawle comment text, author, like count and account name
+            comment_text = comment.find_elements_by_tag_name('span')[1].text
+            comment_author_account = comment.find_element_by_class_name('sqdOP').text
+            comment_like = comment.find_elements_by_class_name('FH9sR')[1].text
+            if 'like' in comment_like:
+                comment_like = comment_like[0]
+            else:
+                comment_like = '0'
+
+            # ? create instance from comment class
+            commentInstance = Comment_Class(comment_account, comment_text, comment_author_account, comment_like)
+            # ? store course in excel
+            excel.storeDataInExcel(row, 0, commentInstance)
+            row = row + 1
 
 login()
-get_comments()
-excel.closeExcel()
+get_post_list()
+# get_comments()
+# excel.closeExcel()
