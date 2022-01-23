@@ -1,4 +1,4 @@
-class comment_class():
+class Comment_Class():
     def __init__(self, account_name, text, author, likes):
         self.account_name = account_name
         self.text = text

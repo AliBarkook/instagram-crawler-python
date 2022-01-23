@@ -17,12 +17,19 @@ import requests
 from bs4 import BeautifulSoup
 
 # ! class
-from classes.comment_class import comment_class
+from classes.comment_class import Comment_Class
+from classes.excel_class import Excel_Class
 
 site_login_url = 'https://www.instagram.com/accounts/login/'
 site_url = 'https://www.instagram.com/'
 username = 'ghost_sniper001'
 password = 'Pashmak2'
+
+
+# ? create excel file and worksheet
+# ? create instance from ecxel class
+excel = Excel_Class('excels/comment_list.xlsx', 'comments')
+excel.initExcel()
 
 # ? create and return chrome driver
 def createChromeDriver():
@@ -177,21 +184,22 @@ comment_list = driver.find_elements_by_class_name('Mr508')
 comment_account = driver.find_element_by_class_name('ZIAjV').text
 
 # ? get comments info
-for comment in comment_list:
+for index, comment in enumerate(comment_list):
 
     # ? crawle comment text, author, like count and account name
     comment_text = comment.find_elements_by_tag_name('span')[1].text
     comment_author_account = comment.find_element_by_class_name('sqdOP').text
     comment_like = comment.find_elements_by_class_name('FH9sR')[1].text
-
     if 'like' in comment_like:
         comment_like = comment_like[0]
     else:
         comment_like = '0'
 
-    commentInstanse = comment_class(comment_account, comment_text, comment_author_account, comment_like)
+    commentInstanse = Comment_Class(comment_account, comment_text, comment_author_account, comment_like)
+    # ? store course in excel
+    excel.storeDataInExcel(index+1, 0, commentInstanse)
 
-    print(commentInstanse.return_prop_as_list())
 
+excel.closeExcel()
 
 # post_list = driver.find_element_by_tag_name('Mr508').text
