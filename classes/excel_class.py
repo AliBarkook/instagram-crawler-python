@@ -2,7 +2,7 @@
 # ? import excel module
 import xlsxwriter 
 
-class Excel_Class:
+class Excel_Class():
 
     """
 
@@ -12,13 +12,13 @@ class Excel_Class:
     |                                                                    |
     |---------------------------------------------------------------------
     |                                                                    |
-    |   1 - initial Class with excel name, sheet name and list of title  |
+    |   1 - initial Class with excel name and sheet name                 |
     |                                                                    |
     |   2 - create excel file and worksheet                              |
     |                                                                    |
     |   3 - close excel                                                  |
     |                                                                    |
-    |   4 - store course data in excel row                               |
+    |   4 - store comment data in excel row                              |
     |                                                                    |
     ----------------------------------------------------------------------
 
