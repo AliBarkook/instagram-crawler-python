@@ -2,8 +2,10 @@
 # ! modules:
 
 # ? improt selenium module
+from pydoc import text
 from sys import orig_argv
 from time import sleep
+from turtle import onclick
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -15,6 +17,11 @@ import requests
 
 # ? import Beautiful soup module for pars html
 from bs4 import BeautifulSoup
+
+# ? import tkinter module for UI
+import tkinter as tk
+from tkinter import * 
+from tkinter.ttk import *
 
 # ! class
 from classes.comment_class import Comment_Class
@@ -39,20 +46,16 @@ def createChromeDriver():
     options.add_experimental_option('useAutomationExtension', False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_argument("--start-maximized")
-    # options.add_argument("incognito")
     return webdriver.Chrome('chromedriver/chromedriver', options=options)
 
 
-# ? create driver and fix it`s bug
+# # ? create driver and fix it`s bug
 driver = createChromeDriver()
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-# entry_hashtag = input('enter hashtag: ')
-entry_hashtag = 'یلدا'
-
 
 # ? login to instagram
-def login():
+def login(login_btn, account_limit, post_limit):
     print('trying to login')
     # ? open chrome 
     driver.get(site_login_url)
@@ -69,10 +72,24 @@ def login():
     # ? click submit button to login
     WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="loginForm"]/div/div[3]/button/div'))).click()
 
-    sleep(5)        
+    sleep(5)  
+
+    login_btn.destroy()
+
+    # # ? add comment button to menu
+    # comment_btn = tk.Button(root, text = 'get comments', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": get_comments())
+    # comment_btn.pack(side = 'top', padx=8, pady=8)         
+    # ? add hashtag input in menu
+    hashtag_lable = Label(root, text='enter hsashtag')
+    hashtag_lable.pack()
+    hashtag_entry = Entry(root,width=10)
+    hashtag_entry.pack()  
+    comment_btn = tk.Button(root, text = 'search', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": search_hashtag(hashtag_entry, account_limit, post_limit))
+    comment_btn.pack(side = 'top', padx=8, pady=8)         
 
 # ? search for hashtag
-def search_hashtag():
+def search_hashtag(hashtag_entry, account_limit, post_limit):
+    entry_hashtag = '#' + hashtag_entry.get()
     print('searching for hashtag')
 
     # ? fill search input
@@ -85,15 +102,19 @@ def search_hashtag():
 
     sleep(5)
 
+    get_account_list(account_limit, post_limit)
+
 # ? get href of accounts
-def get_account_list():
+def get_account_list(account_limit, post_limit):
     print('getting accounts name ...')
     posts = driver.find_elements_by_class_name('v1Nh3')
+    print('account_limit is', account_limit)
 
     sleep(2)
 
     accountList = []
 
+    index = 1
     for post in posts:
         # ? find post url
         postUrl = post.find_element_by_tag_name('a').get_attribute('href')
@@ -114,7 +135,12 @@ def get_account_list():
         # ? add account name to list
         accountList.append(account_name)
 
-    print(accountList)
+
+        if index == account_limit:
+            break
+
+        index+=1
+
 
     # ? store account list to text file
     with open('account_lists/account_name.txt' , 'w') as f:
@@ -122,8 +148,10 @@ def get_account_list():
             f.write(line)
             f.write('\n')
 
+    get_post_list(post_limit)
+
 # ? get post of accounts
-def get_post_list():
+def get_post_list(post_limit):
     account_list_file = open('account_lists/account_name.txt', 'r')
     accountList = account_list_file.readlines()
     print('getting accounts post urls')
@@ -137,9 +165,14 @@ def get_post_list():
 
         post_list = driver.find_elements_by_class_name('v1Nh3')
 
+        index = 1
         # ? find posts href
         for post in post_list:
             post_links.append(post.find_element_by_tag_name('a').get_attribute('href'))
+
+            if index == post_limit:
+                break
+            index+=1
         
 
     # ? store post link list to text file
@@ -147,6 +180,8 @@ def get_post_list():
         for line in post_links:
             f.write(line)
             f.write('\n')
+
+    get_comments()
 
 # ? get comments and store to excel
 def get_comments():
@@ -185,7 +220,59 @@ def get_comments():
             excel.storeDataInExcel(row, 0, commentInstance)
             row = row + 1
 
-login()
-get_post_list()
-# get_comments()
-# excel.closeExcel()
+    excel.closeExcel()
+    exit_application()
+
+ 
+def exit_application():
+    driver.close()
+    root.destroy()
+
+def main():
+    
+    account_limit = int(account_count_entry.get())
+    post_limit = int(post_count_entry.get())
+
+
+    # ? remove prevouse step lable, input and button
+    continue_btn.destroy()
+    account_count_lable.destroy()
+    account_count_entry.destroy()
+    post_count_lable.destroy()
+    post_count_entry.destroy()
+
+    # ? Create login and exit Button
+    login_btn = tk.Button(root, text = 'login', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": login(login_btn, account_limit, post_limit))
+    close_btn = tk.Button(root, text = 'exit', bg='#F04438', fg='#ffffff', width=20, command=lambda m="": exit_application())
+    
+    # ? Set the position of button on the top of window.  
+    login_btn.pack(side = 'top', padx=8, pady=8)   
+    close_btn.pack(side = 'top', padx=16, pady=16)   
+    
+    root.mainloop()
+
+root = Tk()
+# ? Open window having dimension 300x300
+root.geometry('300x300')
+
+# ? input for accounts number
+account_count_lable = Label(root, text='enter number of accounts that you want crawl')
+account_count_lable.pack()
+account_count_entry = Entry(root,width=10)
+account_count_entry.pack()
+
+# ? input for posts number
+post_count_lable = Label(root, text='enter number of posts that you want crawl')
+post_count_lable.pack()
+post_count_entry = Entry(root,width=10)
+post_count_entry.pack()
+
+# ? create continue button
+continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": main())
+continue_btn.pack(side = 'top', padx=8, pady=8)
+
+root.mainloop()
+ 
+
+
+
