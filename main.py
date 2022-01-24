@@ -33,11 +33,15 @@ import threading
 from classes.comment_class import Comment_Class
 from classes.excel_class import Excel_Class
 
+
+# ? initial value
 site_login_url = 'https://www.instagram.com/accounts/login/'
 site_url = 'https://www.instagram.com/'
 username = 'ghost_sniper001'
 password = 'Pashmak2'
 
+
+# ? threading class for create new thread
 class Thread_Class (threading.Thread):
    def __init__(self, link):
       threading.Thread.__init__(self)
@@ -65,6 +69,7 @@ driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () =>
 # ? login to instagram
 def login(login_btn, account_limit, post_limit):
     print('trying to login')
+
     # ? open chrome 
     driver.get(site_login_url)
 
@@ -82,6 +87,8 @@ def login(login_btn, account_limit, post_limit):
 
     sleep(5)  
 
+
+    # ? remove login button
     login_btn.destroy()
 
     # ? add hashtag input in menu
@@ -155,8 +162,11 @@ def get_account_list(account_limit, post_limit):
 
 # ? get post of accounts
 def get_post_list(post_limit):
+
+    # ? read account names from queue
     account_list_file = open('queue/account_name.txt', 'r')
     accountList = account_list_file.readlines()
+
     print('getting accounts post urls')
 
 
@@ -321,5 +331,3 @@ continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', wi
 continue_btn.pack(side = 'top', padx=8, pady=8)
 
 root.mainloop()
-
-
