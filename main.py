@@ -137,7 +137,7 @@ def get_account_list(account_limit, post_limit):
 
 
     # ? store account list to text file
-    with open('account_lists/account_name.txt' , 'w') as f:
+    with open('queue/account_name.txt' , 'w') as f:
         for line in accountList:
             f.write(line)
             f.write('\n')
@@ -147,7 +147,7 @@ def get_account_list(account_limit, post_limit):
 
 # ? get post of accounts
 def get_post_list(post_limit):
-    account_list_file = open('account_lists/account_name.txt', 'r')
+    account_list_file = open('queue/account_name.txt', 'r')
     accountList = account_list_file.readlines()
     print('getting accounts post urls')
 
@@ -171,7 +171,7 @@ def get_post_list(post_limit):
         
 
     # ? store post link list to text file
-    with open('account_lists/post_link.txt' , 'w') as f:
+    with open('queue/post_link.txt' , 'w') as f:
         for line in post_links:
             f.write(line)
             f.write('\n')
@@ -189,7 +189,7 @@ def get_comments(excel_directory_entry):
     excel.initExcel()
 
     # ? read post links from text file queue
-    post_list_file = open('account_lists/post_link.txt', 'r')
+    post_list_file = open('queue/post_link.txt', 'r')
     post_list = post_list_file.readlines()
 
     row = 1
