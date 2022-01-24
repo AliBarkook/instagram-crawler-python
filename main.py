@@ -3,15 +3,17 @@
 
 # ? improt selenium module
 from pydoc import text
-import queue
 from sys import orig_argv
-from time import sleep
 from turtle import onclick
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+
+# ? import time and speep module
+from time import time, sleep
 
 # ? improt request module for http request
 import requests
@@ -24,6 +26,9 @@ import tkinter as tk
 from tkinter import * 
 from tkinter.ttk import *
 
+# ? import thrading module
+import threading
+
 # ! class
 from classes.comment_class import Comment_Class
 from classes.excel_class import Excel_Class
@@ -32,6 +37,13 @@ site_login_url = 'https://www.instagram.com/accounts/login/'
 site_url = 'https://www.instagram.com/'
 username = 'ghost_sniper001'
 password = 'Pashmak2'
+
+class Thread_Class (threading.Thread):
+   def __init__(self, link):
+      threading.Thread.__init__(self)
+      self.link = link
+   def run(self):
+      return get_account_name(self.link)
 
 
 # ? create and return chrome driver
@@ -45,7 +57,7 @@ def createChromeDriver():
     return webdriver.Chrome('chromedriver/chromedriver', options=options)
 
 
- # ? create driver and fix it`s bug
+# ? create driver and fix it`s bug
 driver = createChromeDriver()
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
@@ -109,27 +121,23 @@ def get_account_list(account_limit, post_limit):
     accountList = []
 
     index = 1
+
+    # ? get account names and sotre to text file
     for post in posts:
         # ? find post url
         postUrl = post.find_element_by_tag_name('a').get_attribute('href')
 
-        # ? read cookie use selenium and set to request
-        cookies = driver.get_cookies()
-        session = requests.Session()
-        for cookie in cookies:
-            session.cookies.set(cookie['name'], cookie['value'])
+        # ? create instanve form thread class and pass link and row to it
+        thread1 = Thread_Class(postUrl)
 
-        # ? request to get post account page
-        postResponse = session.get(postUrl)
-        beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
-
-        # ? find account name
-        account_name = (str(beauti_Post.find_all('script')[15]).split('username')[1]).split('"')[2]
+        # ? start thread
+        thread1.start()
 
         # ? add account name to list
-        accountList.append(account_name)
+        accountList.append(thread1.run())
 
 
+        # ? check for account limit
         if index == account_limit:
             break
 
@@ -179,13 +187,13 @@ def get_post_list(post_limit):
 
     get_excel_directory()
     get_comments()
-
+    
 
 # ? get comments and store to excel
 def get_comments(excel_directory_entry):
 
     # ? create excel file and worksheet
-    excel = Excel_Class(excel_directory_entry.get() + '.xlsx', 'comments')
+    excel = Excel_Class('excels/' + excel_directory_entry.get() + '.xlsx', 'comments')
     excel.initExcel()
 
     # ? read post links from text file queue
@@ -194,7 +202,7 @@ def get_comments(excel_directory_entry):
 
     row = 1
     for index, post in enumerate(post_list):
-        print('getting post number' + str(index))
+        print('getting post number ' + str(index))
         driver.get(post.strip())
 
         sleep(2)
@@ -239,6 +247,24 @@ def get_excel_directory():
     # ? create continue button
     continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": get_comments(excel_directory_entry))
     continue_btn.pack(side = 'top', padx=8, pady=8)
+
+
+# ? get acuount names in multi threading mode
+def get_account_name(postUrl):
+    # ? read cookie use selenium and set to request
+    cookies = driver.get_cookies()
+    session = requests.Session()
+    for cookie in cookies:
+        session.cookies.set(cookie['name'], cookie['value'])
+
+    # ? request to get post account page
+    postResponse = session.get(postUrl)
+    beauti_Post = BeautifulSoup(postResponse.text, 'html.parser')
+
+    # ? find account name
+    account_name = (str(beauti_Post.find_all('script')[15]).split('username')[1]).split('"')[2]
+
+    return account_name
 
  
 # ? close driver and tkinter panel then exit app
@@ -295,3 +321,5 @@ continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', wi
 continue_btn.pack(side = 'top', padx=8, pady=8)
 
 root.mainloop()
+
+
