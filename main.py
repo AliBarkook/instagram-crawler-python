@@ -80,6 +80,7 @@ def login(login_btn, account_limit, post_limit):
     comment_btn = tk.Button(root, text = 'search', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": search_hashtag(hashtag_entry, account_limit, post_limit))
     comment_btn.pack(side = 'top', padx=8, pady=8)         
 
+
 # ? search for hashtag
 def search_hashtag(hashtag_entry, account_limit, post_limit):
     entry_hashtag = '#' + hashtag_entry.get()
@@ -96,6 +97,7 @@ def search_hashtag(hashtag_entry, account_limit, post_limit):
     sleep(5)
 
     get_account_list(account_limit, post_limit)
+
 
 # ? get link of accounts
 def get_account_list(account_limit, post_limit):
@@ -142,6 +144,7 @@ def get_account_list(account_limit, post_limit):
 
     get_post_list(post_limit)
 
+
 # ? get post of accounts
 def get_post_list(post_limit):
     account_list_file = open('account_lists/account_name.txt', 'r')
@@ -176,6 +179,7 @@ def get_post_list(post_limit):
 
     get_excel_directory()
     get_comments()
+
 
 # ? get comments and store to excel
 def get_comments(excel_directory_entry):
@@ -223,6 +227,8 @@ def get_comments(excel_directory_entry):
     excel.closeExcel()
     exit_application()
 
+
+# ? get excel file name from user
 def get_excel_directory():
     # ? input for excel file directory number
     excel_directory_lable = Label(root, text='enter excel file name')
@@ -235,10 +241,12 @@ def get_excel_directory():
     continue_btn.pack(side = 'top', padx=8, pady=8)
 
  
+# ? close driver and tkinter panel then exit app
 def exit_application():
     driver.close()
     root.destroy()
 
+# ? main function: start app
 def main():
     
     # ? store account and post limit
