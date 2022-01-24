@@ -3,6 +3,7 @@
 
 # ? improt selenium module
 from pydoc import text
+import queue
 from sys import orig_argv
 from time import sleep
 from turtle import onclick
@@ -33,11 +34,6 @@ username = 'ghost_sniper001'
 password = 'Pashmak2'
 
 
-# ? create excel file and worksheet
-# ? create instance from ecxel class
-excel = Excel_Class('excels/comment_list.xlsx', 'comments')
-excel.initExcel()
-
 # ? create and return chrome driver
 def createChromeDriver():
     options = webdriver.ChromeOptions()
@@ -49,7 +45,7 @@ def createChromeDriver():
     return webdriver.Chrome('chromedriver/chromedriver', options=options)
 
 
-# # ? create driver and fix it`s bug
+ # ? create driver and fix it`s bug
 driver = createChromeDriver()
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
@@ -76,9 +72,6 @@ def login(login_btn, account_limit, post_limit):
 
     login_btn.destroy()
 
-    # # ? add comment button to menu
-    # comment_btn = tk.Button(root, text = 'get comments', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": get_comments())
-    # comment_btn.pack(side = 'top', padx=8, pady=8)         
     # ? add hashtag input in menu
     hashtag_lable = Label(root, text='enter hsashtag')
     hashtag_lable.pack()
@@ -104,11 +97,10 @@ def search_hashtag(hashtag_entry, account_limit, post_limit):
 
     get_account_list(account_limit, post_limit)
 
-# ? get href of accounts
+# ? get link of accounts
 def get_account_list(account_limit, post_limit):
     print('getting accounts name ...')
     posts = driver.find_elements_by_class_name('v1Nh3')
-    print('account_limit is', account_limit)
 
     sleep(2)
 
@@ -181,10 +173,18 @@ def get_post_list(post_limit):
             f.write(line)
             f.write('\n')
 
+
+    get_excel_directory()
     get_comments()
 
 # ? get comments and store to excel
-def get_comments():
+def get_comments(excel_directory_entry):
+
+    # ? create excel file and worksheet
+    excel = Excel_Class(excel_directory_entry.get() + '.xlsx', 'comments')
+    excel.initExcel()
+
+    # ? read post links from text file queue
     post_list_file = open('account_lists/post_link.txt', 'r')
     post_list = post_list_file.readlines()
 
@@ -223,6 +223,17 @@ def get_comments():
     excel.closeExcel()
     exit_application()
 
+def get_excel_directory():
+    # ? input for excel file directory number
+    excel_directory_lable = Label(root, text='enter excel file name')
+    excel_directory_lable.pack()
+    excel_directory_entry = Entry(root,width=10)
+    excel_directory_entry.pack()
+
+    # ? create continue button
+    continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', width=20, command=lambda m="": get_comments(excel_directory_entry))
+    continue_btn.pack(side = 'top', padx=8, pady=8)
+
  
 def exit_application():
     driver.close()
@@ -230,6 +241,7 @@ def exit_application():
 
 def main():
     
+    # ? store account and post limit
     account_limit = int(account_count_entry.get())
     post_limit = int(post_count_entry.get())
 
@@ -251,7 +263,10 @@ def main():
     
     root.mainloop()
 
+
+# ? init tkinter panel
 root = Tk()
+
 # ? Open window having dimension 300x300
 root.geometry('300x300')
 
@@ -272,7 +287,3 @@ continue_btn = tk.Button(root, text = 'continue', bg='#46BB3C', fg='#ffffff', wi
 continue_btn.pack(side = 'top', padx=8, pady=8)
 
 root.mainloop()
- 
-
-
-
